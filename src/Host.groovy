@@ -5,8 +5,6 @@ import groovy.transform.ToString
  */
 @ToString(ignoreNulls = true, includeFields = true, includeNames = true)
 class Host {
-    static final String HOST_COLOR = "seagreen"
-    static final String HOST_FONT_COLOR = "white"
 
     String ip
     String name
@@ -17,32 +15,35 @@ class Host {
     String rackName
     List components = []
 
-    static Host fromAmbariJson(json) {
-        Host host = new Host()
+    private Boolean master
 
-        host.ip = json.Hosts.ip
-        host.name = json.Hosts.host_name
-        host.osType = json.Hosts.os_type
-        host.osArch = json.Hosts.os_arch
-        host.cpuCount = json.Hosts.cpu_count
-        host.totalMemory = json.Hosts.total_mem
-
-        // Not currently supported in Ambari 1.7 and below
-        // Need to get from rack topology or dfsadmin report
-        // host.rackName = json.Hosts.rack_info
-
-        json.host_components.each { component ->
-            host.components.add(component.HostRoles.component_name)
+    Boolean isMaster() {
+        if (master == null) {
+            masterComponents = HDPComponents.getMasterComponents(this)
+            nonMasterComponents = HDPComponents.getNonMasterComponents(this)
+            if (masterComponents.size() > 0)
+                master = true
+            else
+                master = false
         }
-
-        return host
+        return master
     }
 
-    String toSimpleDot() {
-        def dotRtn = HostBuilder.SafeEntityName(this.name)
-        dotRtn = dotRtn + " [shape=box,style=filled,color="
-        dotRtn = dotRtn + HOST_COLOR + ",label=\""
-        dotRtn = dotRtn + this.name + "\\n" + this.ip + "\","
-        dotRtn = dotRtn + "fontcolor=" + HOST_FONT_COLOR + "];"
+    private List masterComponents = []
+    private List nonMasterComponents = []
+
+    List getMasterComponents() {
+        if (master == null) {
+            isMaster()
+        }
+        return masterComponents
     }
+
+    List getNonMasterComponents() {
+        if (master == null) {
+            isMaster()
+        }
+        return nonMasterComponents
+    }
+
 }

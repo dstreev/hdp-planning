@@ -87,8 +87,6 @@ cluster.items.each { item ->
 rackHosts.each { rack,hostlist ->
     one_rack = new File("/tmp/" + rack + ".dot")
     def lclRackComponents = [:] // Categoy:ComponentList
-    def lclRackMasterHosts = []
-    def lclRackHosts = []
     one_rack.withWriter { w ->
         w.writeLine("digraph one_rack {")
         w.writeLine("\trankdir=TB;")
@@ -103,13 +101,13 @@ rackHosts.each { rack,hostlist ->
 //        w.writeLine("\temstrs [shape=none,label=\"Eco-System\\nMasters\"];")
 //        w.writeLine("\tmngt [shape=none,label=\"Management\\nComponents\"];")
 //        w.writeLine("\tcomp [shape=none,label=\"HDP Components\"];")
-//
-//        // Rack Hierarchy
-//        w.writeLine("\tclnts -> cmstrs -> comp -> mhosts -> hosts -> emstrs -> mngt [color=white];")
+
+        // Rack Hierarchy
+//        w.writeLine("\tclnts -> cmstrs -> comp -> mhosts -> hosts -> emstrs -> mngt;")
+        w.writeLine("\t" + rack + " [shape=Mdiamond,fontcolor=grey,label=\"Rack\\n[" + rack + "]\",fontsize=20];")
 
         hostlist.each { host ->
-            w.writeLine("\t" + HostBuilder.dotExtended(host))
-            boolean isMaster = false
+            w.writeLine("\t" + HostBuilder.dotFull(host))
             host.components.each { hostComponent ->
                 def category = HDPComponents.whichCategoryDot(hostComponent)
                 def clist = lclRackComponents[category]
@@ -120,56 +118,19 @@ rackHosts.each { rack,hostlist ->
                 if (!clist.contains(hostComponent)) {
                     clist.add(hostComponent)
                 }
-                if (!isMaster) {
-                    isMaster = HDPComponents.isMasterComponent(hostComponent)
-                }
-                // Associate host to component
-                if (HDPComponents.isMasterComponent(hostComponent))
-                    w.writeLine("\t" + HostBuilder.SafeEntityName(host.name) + " -> " + hostComponent + ";")
             }
-            if (isMaster) {
-                lclRackMasterHosts.add(host)
-            } else {
-                lclRackHosts.add(host)
-            }
+//            w.writeLine("\t" + HostBuilder.SafeEntityName(host.name) + " -> " + rack + ";")
         }
 
-        // Master Same Ranking
-//        w.writeLine("\t{ rank = same;")
-//        def mshl = "mhosts"
-//        lclRackMasterHosts.each { host ->
-//            mshl = mshl + ";" + HostBuilder.SafeEntityName(host.name)
-//        }
-//
-//        w.writeLine("\t\t" + mshl + ";")
-//        w.writeLine("\t}")
-//
-//        // Component Same Ranking
-//        w.writeLine("\t{ rank = same;")
-//        def shl = "hosts"
-//        lclRackHosts.each { host ->
-//            shl = shl + ";" + HostBuilder.SafeEntityName(host.name)
-//        }
-//        w.writeLine("\t\t" + shl + ";")
-//        w.writeLine("\t}")
 
         // Component Ranking
-        lclRackComponents.each { category, componentlist ->
-            // DOUBLES UP, MAYBE...
-            componentlist.each { component ->
-                if (HDPComponents.isMasterComponent(component))
-                    w.writeLine("\t" + HDPComponents.toSimpleDot(component))
-            }
-                      //************
-//            w.writeLine("\t{ rank = same;")
-//            def rc = category
+//        lclRackComponents.each { category, componentlist ->
+//            // DOUBLES UP, MAYBE...
 //            componentlist.each { component ->
-//                rc = rc + ";" + component
+//                w.writeLine("\t" + HDPComponents.toSimpleDot(component))
 //            }
-//            w.writeLine("\t\t" + rc + ";")
-//            w.writeLine("\t}")
-
-        }
+//
+//        }
 
         w.writeLine("}")
 

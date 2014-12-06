@@ -83,10 +83,10 @@ def hostBuilder = new HostBuilder();
 all_racks = new File("/tmp/all_racks.dot")
 all_racks.withWriter { ar ->
     ar.writeLine("digraph rack_view {")
-    ar.writeLine("\trankdir=TB;")
-    ar.writeLine("\tranksep=0.5")
-    ar.writeLine("\tlabel=\"Rack View\"")
-    ar.writeLine("\tfontsize=14")
+    ar.writeLine("\trankdir=LR;")
+    ar.writeLine("\tranksep=0.1;")
+    ar.writeLine("\tlabel=\"Rack View\";")
+    ar.writeLine("\tfontsize=14;")
 
     def rhierarchy
     racks.each { rack, iplist ->
@@ -100,11 +100,13 @@ all_racks.withWriter { ar ->
           rhierarchy = "\t" +  rack
         }
     }
-    ar.writeLine(rhierarchy)
+    ar.writeLine(rhierarchy + " [color=white];")
 
     cluster.items.each { hostItem ->
-        ar.writeLine(hostBuilder.buildVersion1(hostItem))
+        host = HostBuilder.fromAmbariJson(hostItem)
+        ar.writeLine(HostBuilder.dotExtended(host) + ";")
     }
+
     // TODO: rank = same for each rack.
     def sameranks = [:]
 
@@ -114,18 +116,19 @@ all_racks.withWriter { ar ->
     sameranks.put("default",[])
 
     cluster.items.each { hostItem ->
-        def hostip = hostItem.Hosts.ip
-        def rack = ips[hostip]
+        host = HostBuilder.fromAmbariJson(hostItem)
+//        def hostip = host.ip
+        def rack = ips[host.ip]
         if ( rack != null) {
             rankHosts = sameranks[rack]
             if (rankHosts == null)
                 rankHosts = sameranks["default"]
-            rankHosts.add(HostBuilder.SafeEntityName(hostItem.Hosts.host_name))
+            rankHosts.add(HostBuilder.SafeEntityName(host.name))
         } else {
             rankHosts = sameranks["default"]
-            rankHosts.add(HostBuilder.SafeEntityName(hostItem.Hosts.host_name))
+            rankHosts.add(HostBuilder.SafeEntityName(host.name))
         }
-        ar.writeLine(hostBuilder.buildVersion1(hostItem))
+//        ar.writeLine(HostBuilder.dotExtended(host) + ";")
     }
 
     sameranks.each { rack, hostlist ->
@@ -139,9 +142,18 @@ all_racks.withWriter { ar ->
             }
 
         }
-        ar.writeLine("\t\t" + hostsamerank)
-        ar.writeLine("\t}")
+        ar.writeLine("\t\t" + hostsamerank + ";")
+        ar.writeLine("\t};")
     }
 
     ar.writeLine("}")
+
+    def command = "/usr/local/bin/dot -Tpng -O /tmp/all_racks.dot"
+    def proc = command.execute()
+    proc.waitFor()
+
+    println "return code: ${ proc.exitValue()}"
+    println "stderr: ${proc.err.text}"
+    println "stdout: ${proc.in.text}"
+
 }

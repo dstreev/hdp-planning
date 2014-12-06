@@ -72,6 +72,35 @@ class HDPComponents {
 
     }
 
+    static boolean isMasterHost(host) {
+        boolean rtn = false
+        host.components.each { component ->
+            if (isMasterComponent(component))
+                rtn = true
+        }
+        return rtn
+    }
+
+    static String[] getMasterComponents(host) {
+        def masterComponents = []
+        host.components.each { component ->
+            if (CORE_MASTER_COMPONENTS.contains(component) | ECO_MASTER_COMPONENTS.contains(component))
+                masterComponents.add(component)
+
+        }
+        return masterComponents
+    }
+
+    static String[] getNonMasterComponents(host) {
+        def masterComponents = []
+        host.components.each { component ->
+            if (HDP_COMPONENTS.contains(component) | MANAGEMENT_COMPONENTS.contains(component) | CLIENT_COMPONENTS.contains(component))
+                masterComponents.add(component)
+
+        }
+        return masterComponents
+    }
+
     static String whichCategory(componentName) {
         if (CORE_MASTER_COMPONENTS.contains(componentName)) {
             return CORE_MASTER

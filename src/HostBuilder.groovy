@@ -3,52 +3,154 @@
  */
 class HostBuilder {
 
-    static MASTERS = ["NAMENODE","SECONDARYNAMENODE","RESOURCEMANAGER","HISTORYSERVER","APP_TIMELINE_SERVER","HBASE_MASTER"]
+    static final String HOST_MASTER_COLOR = "darkgreen"
+    static final String HOST_MASTER_FONT_COLOR = "white"
+    static final String HOST_MASTER_FONT_SIZE = 10
 
+    static final String HOST_COLOR = "lightgray"
+    static final String HOST_FONT_COLOR = "black"
+    static final String HOST_FONT_SIZE = 10
     /*
     With the cluster object, build a dot entity for the host and master components.
      */
-    String buildVersion1 (host) {
-        def hostname = host.Hosts.host_name
-        def hostip = host.Hosts.ip
-        def components = []
-        host.host_components.each { component ->
-            if (MASTERS.contains(component.HostRoles.component_name))
-                components.add(component.HostRoles.component_name)
-        }
-        def mcomp
-        components.each { component ->
-            if (mcomp == null) {
-                mcomp = "\\n" + component;
-            } else {
-                mcomp = mcomp + "\\n" + component
-            }
-        }
-        // m2 [shape=box,style=filled,color=seagreen,
-        // label="m1.hdp.com\n10.0.23.10\n----------\nNamenode\nWebHCat\nHBase Mstr\nStorm Nimbus",fontcolor=white];
 
-        def hostEntity = SafeEntityName(hostname) + " [shape=box,style=filled,color="
-        if (mcomp != null)
-            hostEntity = hostEntity + "seagreen"
+    String dotSimple() {
+        def dotRtn = HostBuilder.SafeEntityName(this.name)
+        dotRtn = dotRtn + " [shape=box,style=filled,color="
+        dotRtn = dotRtn + HOST_COLOR + ",label=\""
+        dotRtn = dotRtn + this.name + "\\n" + this.ip + "\","
+        dotRtn = dotRtn + "fontcolor=" + HOST_FONT_COLOR + "];"
+    }
+
+    static String dotBasic (host) {
+        def hostname = host.name
+        def hostip = host.ip
+
+        def hostEntity = SafeEntityName(hostname) + " [shape=record,style=filled,color="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_COLOR
         else
-            hostEntity = hostEntity + "lightblue"
+            hostEntity = hostEntity + HOST_COLOR
 
-        hostEntity = hostEntity + ",label=\"" + hostname + "\\n" + hostip
-
-        if (mcomp != null)
-            hostEntity = hostEntity + mcomp
+        hostEntity = hostEntity + ",label=\"" + hostname + "\\n" + hostip + " | " + host.osType + " * " + host.cpuCount + " * " + host.totalMemory + ""
 
         hostEntity = hostEntity + "\",fontcolor="
-        if (mcomp != null)
-            hostEntity = hostEntity + "white"
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_FONT_COLOR
         else
-            hostEntity = hostEntity + "black"
+            hostEntity = hostEntity + HOST_FONT_COLOR
 
-        hostEntity = hostEntity + ",fontsize=9]"
+        hostEntity = hostEntity + ",fontsize="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_FONT_SIZE
+        else
+            hostEntity = hostEntity + HOST_FONT_SIZE
+
+        hostEntity = hostEntity + "]"
+    }
+
+    static String dotExtended (host) {
+        def hostname = host.name
+        def hostip = host.ip
+
+        def hostEntity = SafeEntityName(hostname) + " [shape=record,style=filled,color="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_COLOR
+        else
+            hostEntity = hostEntity + HOST_COLOR
+
+//        hostEntity = hostEntity + ",label=\"" + hostname + "\\n" + hostip
+        hostEntity = hostEntity + ",label=\"" + hostname + "\\n" + hostip + " | " + host.osType + "\\n" + host.cpuCount + " cpus " + host.totalMemory + " mem "
+
+        if (host.isMaster()) {
+            hostEntity = hostEntity + " | {"
+            host.getMasterComponents().each { component ->
+                hostEntity = hostEntity + HDPComponents.friendlyComponentName(component) + "\\n"
+            }
+            hostEntity = hostEntity + "}"
+        }
+
+        hostEntity = hostEntity + "\",fontcolor="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_FONT_COLOR
+        else
+            hostEntity = hostEntity + HOST_FONT_COLOR
+
+        hostEntity = hostEntity + ",fontsize="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_FONT_SIZE
+        else
+            hostEntity = hostEntity + HOST_FONT_SIZE
+
+        hostEntity = hostEntity + "]"
+    }
+
+    static String dotFull (host) {
+        def hostname = host.name
+        def hostip = host.ip
+
+        def hostEntity = SafeEntityName(hostname) + " [shape=record,style=filled,color="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_COLOR
+        else
+            hostEntity = hostEntity + HOST_COLOR
+
+        hostEntity = hostEntity + ",label=\" {"  + hostname + "\\n" + hostip + " | " + host.osType + "\\n" + host.cpuCount + " cpus " + host.totalMemory + " mem} | "
+
+        if (host.isMaster()) {
+            hostEntity = hostEntity + " | { "
+            host.getMasterComponents().each { component ->
+                hostEntity = hostEntity + HDPComponents.friendlyComponentName(component) + "\\n"
+            }
+            hostEntity = hostEntity + "  "
+        }
+
+        hostEntity = hostEntity + "| "
+        host.getNonMasterComponents().each { component ->
+            hostEntity = hostEntity + HDPComponents.friendlyComponentName(component) + "\\n"
+        }
+        hostEntity = hostEntity + " }}"
+
+        hostEntity = hostEntity + "\",fontcolor="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_FONT_COLOR
+        else
+            hostEntity = hostEntity + HOST_FONT_COLOR
+
+        hostEntity = hostEntity + ",fontsize="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_FONT_SIZE
+        else
+            hostEntity = hostEntity + HOST_FONT_SIZE
+
+        hostEntity = hostEntity + "]"
     }
 
     static String SafeEntityName(value) {
         value.replaceAll("\\.","").replaceAll("-","")
     }
+
+    static Host fromAmbariJson(json) {
+        Host host = new Host()
+
+        host.ip = json.Hosts.ip
+        host.name = json.Hosts.host_name
+        host.osType = json.Hosts.os_type
+        host.osArch = json.Hosts.os_arch
+        host.cpuCount = json.Hosts.cpu_count
+        host.totalMemory = json.Hosts.total_mem
+
+        // Not currently supported in Ambari 1.7 and below
+        // Need to get from rack topology or dfsadmin report
+        // host.rackName = json.Hosts.rack_info
+
+        json.host_components.each { component ->
+            host.components.add(component.HostRoles.component_name)
+        }
+
+        return host
+    }
+
+
 }
 
