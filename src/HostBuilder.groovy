@@ -49,6 +49,40 @@ class HostBuilder {
         hostEntity = hostEntity + "]"
     }
 
+
+    static String dotBasicComponents (host) {
+        def hostname = host.name
+        def hostip = host.ip
+
+        def hostEntity = SafeEntityName(hostname) + " [shape=record,style=filled,color="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_COLOR
+        else
+            hostEntity = hostEntity + HOST_COLOR
+
+        hostEntity = hostEntity + ",label=\"" + hostname + "\\n" + hostip + " \\n======================\\n " + host.osType + " * " + host.cpuCount + " * " + host.totalMemory + ""
+
+        hostEntity = hostEntity + "| "
+        host.getNonMasterComponents().each { component ->
+            hostEntity = hostEntity + HDPComponents.friendlyComponentName(component) + "\\n"
+        }
+//        hostEntity = hostEntity + " "
+
+        hostEntity = hostEntity + "\",fontcolor="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_FONT_COLOR
+        else
+            hostEntity = hostEntity + HOST_FONT_COLOR
+
+        hostEntity = hostEntity + ",fontsize="
+        if (host.isMaster())
+            hostEntity = hostEntity + HOST_MASTER_FONT_SIZE
+        else
+            hostEntity = hostEntity + HOST_FONT_SIZE
+
+        hostEntity = hostEntity + "]"
+    }
+
     static String dotExtended (host) {
         def hostname = host.name
         def hostip = host.ip

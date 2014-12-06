@@ -63,8 +63,8 @@ if (options.rack) {
     ips = rackResult[1]
 }
 
-println "Racks: " + racks
-println "IPs: " + ips
+//println "Racks: " + racks
+//println "IPs: " + ips
 
 def hosts = []
 def rackHosts = [:]
@@ -133,18 +133,30 @@ rackHosts.each { rack,hostlist ->
 //        }
 
         w.writeLine("}")
+        w.flush()
+        w.close()
+
+        def command = "/usr/local/bin/circo -Tpng -o /tmp/${rack}.png /tmp/${rack}.dot"
+        println "Command: ${command}"
+        def proc = command.execute()
+        proc.waitFor()
+
+        println "return code: ${ proc.exitValue()}"
+        println "stderr: ${proc.err.text}"
+        println "stdout: ${proc.in.text}"
+
 
     }
 
 
-    println "Rack: " + rack
-    println "\tHosts: "
-    hostlist.each { host ->
-        println "\t\t" + host.name
-    }
+//    println "Rack: " + rack
+//    println "\tHosts: "
+//    hostlist.each { host ->
+//        println "\t\t" + host.name
+//    }
 }
 //println hosts
-println rackHosts
+//println rackHosts
 
 //def hostBuilder = new HostBuilder();
 //

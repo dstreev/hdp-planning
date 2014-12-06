@@ -108,7 +108,7 @@ rackHosts.each { rack,hostlist ->
 //        w.writeLine("\tclnts -> cmstrs -> comp -> mhosts -> hosts -> emstrs -> mngt [color=white];")
 
         hostlist.each { host ->
-            w.writeLine("\t" + HostBuilder.dotExtended(host))
+            w.writeLine("\t" + HostBuilder.dotBasicComponents(host))
             boolean isMaster = false
             host.components.each { hostComponent ->
                 def category = HDPComponents.whichCategoryDot(hostComponent)
@@ -173,17 +173,30 @@ rackHosts.each { rack,hostlist ->
 
         w.writeLine("}")
 
+        w.flush()
+        w.close()
+
+        def command = "/usr/local/bin/circo -Tpng -o /tmp/${rack}.png /tmp/${rack}.dot"
+        println "Command: ${command}"
+        def proc = command.execute()
+        proc.waitFor()
+
+        println "return code: ${ proc.exitValue()}"
+        println "stderr: ${proc.err.text}"
+        println "stdout: ${proc.in.text}"
+
+
     }
 
 
-    println "Rack: " + rack
-    println "\tHosts: "
-    hostlist.each { host ->
-        println "\t\t" + host.name
-    }
+//    println "Rack: " + rack
+//    println "\tHosts: "
+//    hostlist.each { host ->
+//        println "\t\t" + host.name
+//    }
 }
 //println hosts
-println rackHosts
+//println rackHosts
 
 //def hostBuilder = new HostBuilder();
 //
