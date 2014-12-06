@@ -147,8 +147,10 @@ all_racks.withWriter { ar ->
     }
 
     ar.writeLine("}")
+    ar.flush()
+    ar.close()
 
-    def command = "/usr/local/bin/dot -Tpng -O /tmp/all_racks.dot"
+    def command = "/usr/local/bin/dot -Tpng -o /tmp/all_racks.png /tmp/all_racks.dot"
     def proc = command.execute()
     proc.waitFor()
 
