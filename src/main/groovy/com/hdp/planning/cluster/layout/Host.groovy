@@ -1,3 +1,5 @@
+package com.hdp.planning.cluster.layout
+
 import groovy.transform.ToString
 
 /**

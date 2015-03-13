@@ -1,3 +1,5 @@
+package com.hdp.planning.cluster.layout
+
 import groovy.json.JsonSlurper
 import groovyjarjarcommonscli.Option
 
@@ -11,7 +13,7 @@ import groovyjarjarcommonscli.Option
  *  aname - Ambari Server username
  *  apass - Ambari Server password
  *
- *  Ambari doesn't current support Rack Awareness.  Supply Rack Information.
+ *  Ambari doesn't current support com.hdp.planning.cluster.layout.Rack Awareness.  Supply com.hdp.planning.cluster.layout.Rack Information.
  *  rack - file with rack topology  default handling will consider the first element the ip address and the 2 as the rack.
  *  rack-fields - comma separated list of the field positions to use to extract the ip and rack info.  0 based.
  *
@@ -24,7 +26,7 @@ cli.j(longOpt: 'json', args: 1, required: false, 'json Input File from Ambari RE
 cli.url(longOpt: 'ambari-url', args: 1, required: false, 'url of the Ambari Server, should include port')
 cli.user(longOpt: 'ambari-username', args: 1, required: false, 'Ambari Username')
 cli.pw(longOpt: 'ambari-password', args: 1, required: false, 'Ambari Password')
-cli.rack(longOpt: 'rack-file', args: 1, required: false, 'Rack Topology File')
+cli.rack(longOpt: 'rack-file', args: 1, required: false, 'com.hdp.planning.cluster.layout.Rack Topology File')
 cli.fields(longOpt: 'rack-fields', args: Option.UNLIMITED_VALUES, valueSeparator: ',', required: false, 'Comma separated of positions for ip and rack in topology file')
 
 def options = cli.parse(this.args)
@@ -85,16 +87,13 @@ all_racks.withWriter { ar ->
     ar.writeLine("digraph rack_view {")
     ar.writeLine("\trankdir=LR;")
     ar.writeLine("\tranksep=0.1;")
-    ar.writeLine("\tlabel=\"Rack View\";")
+    ar.writeLine("\tlabel=\"com.hdp.planning.cluster.layout.Rack View\";")
     ar.writeLine("\tfontsize=14;")
 
     def rhierarchy
     racks.each { rack, iplist ->
-        ar.writeLine("\t" + rack + " [shape=Mdiamond,fontcolor=grey,label=\"Rack\\n[" + rack + "]\",fontsize=10];")
+        ar.writeLine("\t" + rack + " [shape=Mdiamond,fontcolor=grey,label=\"com.hdp.planning.cluster.layout.Rack\\n[" + rack + "]\",fontsize=10];")
         if (rhierarchy != null) {
-//            if (rack == rack.last())
-//                rhierarchy = rhierarchy + rack
-//            else
                 rhierarchy = rhierarchy + " -> " + rack
         } else {
           rhierarchy = "\t" +  rack
@@ -117,7 +116,6 @@ all_racks.withWriter { ar ->
 
     cluster.items.each { hostItem ->
         host = HostBuilder.fromAmbariJson(hostItem)
-//        def hostip = host.ip
         def rack = ips[host.ip]
         if ( rack != null) {
             rankHosts = sameranks[rack]
@@ -128,7 +126,6 @@ all_racks.withWriter { ar ->
             rankHosts = sameranks["default"]
             rankHosts.add(HostBuilder.SafeEntityName(host.name))
         }
-//        ar.writeLine(HostBuilder.dotExtended(host) + ";")
     }
 
     sameranks.each { rack, hostlist ->

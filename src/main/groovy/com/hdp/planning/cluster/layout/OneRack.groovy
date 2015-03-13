@@ -1,3 +1,5 @@
+package com.hdp.planning.cluster.layout
+
 import groovy.json.JsonSlurper
 import groovyjarjarcommonscli.Option
 
@@ -11,7 +13,7 @@ import groovyjarjarcommonscli.Option
  *  aname - Ambari Server username
  *  apass - Ambari Server password
  *
- *  Ambari doesn't current support Rack Awareness.  Supply Rack Information.
+ *  Ambari doesn't current support com.hdp.planning.cluster.layout.Rack Awareness.  Supply com.hdp.planning.cluster.layout.Rack Information.
  *  rack - file with rack topology  default handling will consider the first element the ip address and the 2 as the rack.
  *  rack-fields - comma separated list of the field positions to use to extract the ip and rack info.  0 based.
  *
@@ -24,7 +26,7 @@ cli.j(longOpt: 'json', args: 1, required: false, 'json Input File from Ambari RE
 cli.url(longOpt: 'ambari-url', args: 1, required: false, 'url of the Ambari Server, should include port')
 cli.user(longOpt: 'ambari-username', args: 1, required: false, 'Ambari Username')
 cli.pw(longOpt: 'ambari-password', args: 1, required: false, 'Ambari Password')
-cli.rack(longOpt: 'rack-file', args: 1, required: false, 'Rack Topology File')
+cli.rack(longOpt: 'rack-file', args: 1, required: false, 'com.hdp.planning.cluster.layout.Rack Topology File')
 cli.fields(longOpt: 'rack-fields', args: Option.UNLIMITED_VALUES, valueSeparator: ',', required: false, 'Comma separated of positions for ip and rack in topology file')
 
 def options = cli.parse(this.args)
@@ -94,18 +96,7 @@ rackHosts.each { rack,hostlist ->
         w.writeLine("\trankdir=TB;")
         w.writeLine("\trankspe=0.5;")
         w.writeLine("\tnodesep=0.1;")
-        w.writeLine("\tlabel=\"Individual View for Rack ["+rack+"]\";")
-
-//        w.writeLine("\tclnts [shape=none,label=\"Clients\"];")
-//        w.writeLine("\tcmstrs [shape=none,label=\"Core\\nMasters\"];")
-//        w.writeLine("\tmhosts [shape=none,label=\"Master Hosts\"];")
-//        w.writeLine("\thosts [shape=none,label=\"Hosts\"];")
-//        w.writeLine("\temstrs [shape=none,label=\"Eco-System\\nMasters\"];")
-//        w.writeLine("\tmngt [shape=none,label=\"Management\\nComponents\"];")
-//        w.writeLine("\tcomp [shape=none,label=\"HDP Components\"];")
-//
-//        // Rack Hierarchy
-//        w.writeLine("\tclnts -> cmstrs -> comp -> mhosts -> hosts -> emstrs -> mngt [color=white];")
+        w.writeLine("\tlabel=\"Individual View for com.hdp.planning.cluster.layout.Rack ["+rack+"]\";")
 
         hostlist.each { host ->
             w.writeLine("\t" + HostBuilder.dotBasicComponents(host))
@@ -134,25 +125,6 @@ rackHosts.each { rack,hostlist ->
             }
         }
 
-        // Master Same Ranking
-//        w.writeLine("\t{ rank = same;")
-//        def mshl = "mhosts"
-//        lclRackMasterHosts.each { host ->
-//            mshl = mshl + ";" + HostBuilder.SafeEntityName(host.name)
-//        }
-//
-//        w.writeLine("\t\t" + mshl + ";")
-//        w.writeLine("\t}")
-//
-//        // Component Same Ranking
-//        w.writeLine("\t{ rank = same;")
-//        def shl = "hosts"
-//        lclRackHosts.each { host ->
-//            shl = shl + ";" + HostBuilder.SafeEntityName(host.name)
-//        }
-//        w.writeLine("\t\t" + shl + ";")
-//        w.writeLine("\t}")
-
         // Component Ranking
         lclRackComponents.each { category, componentlist ->
             // DOUBLES UP, MAYBE...
@@ -160,14 +132,6 @@ rackHosts.each { rack,hostlist ->
                 if (HDPComponents.isMasterComponent(component))
                     w.writeLine("\t" + HDPComponents.toSimpleDot(component))
             }
-                      //************
-//            w.writeLine("\t{ rank = same;")
-//            def rc = category
-//            componentlist.each { component ->
-//                rc = rc + ";" + component
-//            }
-//            w.writeLine("\t\t" + rc + ";")
-//            w.writeLine("\t}")
 
         }
 
@@ -188,81 +152,4 @@ rackHosts.each { rack,hostlist ->
 
     }
 
-
-//    println "Rack: " + rack
-//    println "\tHosts: "
-//    hostlist.each { host ->
-//        println "\t\t" + host.name
-//    }
 }
-//println hosts
-//println rackHosts
-
-//def hostBuilder = new HostBuilder();
-//
-//all_racks = new File("/tmp/all_racks.dot")
-//all_racks.withWriter { ar ->
-//    ar.writeLine("digraph rack_view {")
-//    ar.writeLine("\trankdir=TB;")
-//    ar.writeLine("\tranksep=0.5")
-//    ar.writeLine("\tlabel=\"Rack View\"")
-//    ar.writeLine("\tfontsize=14")
-//
-//    def rhierarchy
-//    racks.each { rack, iplist ->
-//        ar.writeLine("\t" + rack + " [shape=Mdiamond,fontcolor=grey,label=\"Rack\\n[" + rack + "]\",fontsize=10];")
-//        if (rhierarchy != null) {
-////            if (rack == rack.last())
-////                rhierarchy = rhierarchy + rack
-////            else
-//                rhierarchy = rhierarchy + " -> " + rack
-//        } else {
-//          rhierarchy = "\t" +  rack
-//        }
-//    }
-//    ar.writeLine(rhierarchy)
-//
-//    cluster.items.each { hostItem ->
-//        ar.writeLine(hostBuilder.buildVersion1(hostItem))
-//    }
-//    // TODO: rank = same for each rack.
-//    def sameranks = [:]
-//
-//    racks.each { rack, hostlist ->
-//        sameranks.put(rack,[rack])
-//    }
-//    sameranks.put("default",[])
-//
-//    cluster.items.each { hostItem ->
-//        def hostip = hostItem.Hosts.ip
-//        def rack = ips[hostip]
-//        if ( rack != null) {
-//            rankHosts = sameranks[rack]
-//            if (rankHosts == null)
-//                rankHosts = sameranks["default"]
-//            rankHosts.add(HostBuilder.SafeEntityName(hostItem.Hosts.host_name))
-//        } else {
-//            rankHosts = sameranks["default"]
-//            rankHosts.add(HostBuilder.SafeEntityName(hostItem.Hosts.host_name))
-//        }
-//        ar.writeLine(hostBuilder.buildVersion1(hostItem))
-//    }
-//
-//    sameranks.each { rack, hostlist ->
-//        ar.writeLine("\t{ rank = same;")
-//        def hostsamerank
-//        hostlist.each { host ->
-//            if (hostsamerank != null) {
-//                hostsamerank = hostsamerank + ";" + host
-//            } else {
-//                hostsamerank = host
-//            }
-//
-//        }
-//        ar.writeLine("\t\t" + hostsamerank)
-//        ar.writeLine("\t}")
-//    }
-//
-//    ar.writeLine("}")
-
-//}

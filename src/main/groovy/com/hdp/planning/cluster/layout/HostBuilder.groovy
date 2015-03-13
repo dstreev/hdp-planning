@@ -1,13 +1,14 @@
+package com.hdp.planning.cluster.layout
 /**
  * Created by dstreev on 12/4/14.
  */
 class HostBuilder {
 
-    static final String HOST_MASTER_COLOR = "darkgreen"
-    static final String HOST_MASTER_FONT_COLOR = "white"
+    static final String HOST_MASTER_COLOR = "palegreen"
+    static final String HOST_MASTER_FONT_COLOR = "black"
     static final String HOST_MASTER_FONT_SIZE = 10
 
-    static final String HOST_COLOR = "lightgray"
+    static final String HOST_COLOR = "tan"
     static final String HOST_FONT_COLOR = "black"
     static final String HOST_FONT_SIZE = 10
     /*
@@ -54,7 +55,7 @@ class HostBuilder {
         def hostname = host.name
         def hostip = host.ip
 
-        def hostEntity = SafeEntityName(hostname) + " [shape=record,style=filled,color="
+        def hostEntity = SafeEntityName(hostname) + " [shape=box,style=filled,color="
         if (host.isMaster())
             hostEntity = hostEntity + HOST_MASTER_COLOR
         else
@@ -62,11 +63,88 @@ class HostBuilder {
 
         hostEntity = hostEntity + ",label=\"" + hostname + "\\n" + hostip + " \\n======================\\n " + host.osType + " * " + host.cpuCount + " * " + host.totalMemory + ""
 
-        hostEntity = hostEntity + "| "
-        host.getNonMasterComponents().each { component ->
-            hostEntity = hostEntity + HDPComponents.friendlyComponentName(component) + "\\n"
+        hostEntity = hostEntity + "\\n"
+        def comps;
+
+        HDPComponents.getComponents(HDPComponents.MASTER_COMPONENT, host).each { component ->
+            if (comps != null)
+                comps += component
+            else
+                comps = component
+            if (component != HDPComponents.getComponents(HDPComponents.MASTER_COMPONENT, host).last() ) {
+                comps += ","
+            }
+
         }
-//        hostEntity = hostEntity + " "
+        if (comps != null) {
+            comps = "Mstr:("+comps+")"
+            hostEntity += comps + "\\n"
+            comps = null;
+        }
+
+        HDPComponents.getComponents(HDPComponents.ECO_MASTER_COMPONENT, host).each { component ->
+            if (comps != null)
+                comps += component
+            else
+                comps = component
+            if (component != HDPComponents.getComponents(HDPComponents.ECO_MASTER_COMPONENT, host).last() ) {
+                comps += ","
+            }
+
+        }
+        if (comps != null) {
+            comps = "EMstr:("+comps+")"
+            hostEntity += comps + "\\n"
+            comps = null;
+        }
+
+        HDPComponents.getComponents(HDPComponents.CORE_COMPONENT, host).each { component ->
+            if (comps != null)
+                comps += component
+            else
+                comps = component
+            if (component != HDPComponents.getComponents(HDPComponents.CORE_COMPONENT, host).last() ) {
+                comps += ","
+            }
+
+        }
+        if (comps != null) {
+            comps = "Core:("+comps+")"
+            hostEntity += comps + "\\n"
+            comps = null;
+        }
+
+        HDPComponents.getComponents(HDPComponents.CLIENT_COMPONENT, host).each { component ->
+            if (comps != null)
+                comps += component
+            else
+                comps = component
+            if (component != HDPComponents.getComponents(HDPComponents.CLIENT_COMPONENT, host).last() ) {
+                comps += ","
+            }
+
+        }
+        if (comps != null) {
+            comps = "Clnt:("+comps+")"
+            hostEntity += comps + "\\n"
+            comps = null;
+        }
+
+        HDPComponents.getComponents(HDPComponents.MANAGEMENT_COMPONENT, host).each { component ->
+            if (comps != null)
+                comps += component
+            else
+                comps = component
+            if (component != HDPComponents.getComponents(HDPComponents.MANAGEMENT_COMPONENT, host).last() ) {
+                comps += ","
+            }
+
+        }
+        if (comps != null) {
+            comps = "Mngt:("+comps+")"
+            hostEntity += comps + "\\n"
+            comps = null;
+        }
 
         hostEntity = hostEntity + "\",fontcolor="
         if (host.isMaster())
