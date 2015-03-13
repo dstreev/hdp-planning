@@ -155,8 +155,8 @@ full_graph = new File(options.output + "/cluster.dot")
 full_graph.withWriter { w ->
     w.writeLine("digraph all {")
     w.writeLine("\trankdir=LR;")
-    w.writeLine("\tranksep=0.5")
-    w.writeLine("\tnodesep=0.5")
+    w.writeLine("\tranksep=0.1")
+    w.writeLine("\tnodesep=0.1")
 
     rackHosts.each { rack, hostlist ->
         w.writeLine("subgraph cluster"+rack+" {")

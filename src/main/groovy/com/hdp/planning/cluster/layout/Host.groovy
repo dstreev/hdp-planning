@@ -17,35 +17,4 @@ class Host {
     String rackName
     List components = []
 
-    private Boolean master
-
-    Boolean isMaster() {
-        if (master == null) {
-            masterComponents = HDPComponents.getMasterComponents(this)
-            nonMasterComponents = HDPComponents.getNonMasterComponents(this)
-            if (masterComponents.size() > 0)
-                master = true
-            else
-                master = false
-        }
-        return master
-    }
-
-    private List masterComponents = []
-    private List nonMasterComponents = []
-
-    List getMasterComponents() {
-        if (master == null) {
-            isMaster()
-        }
-        return masterComponents
-    }
-
-    List getNonMasterComponents() {
-        if (master == null) {
-            isMaster()
-        }
-        return nonMasterComponents
-    }
-
 }

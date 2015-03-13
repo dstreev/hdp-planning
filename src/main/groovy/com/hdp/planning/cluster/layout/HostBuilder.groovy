@@ -56,7 +56,7 @@ class HostBuilder {
         def hostip = host.ip
 
         def hostEntity = SafeEntityName(hostname) + " [shape=box,style=filled,color="
-        if (host.isMaster())
+        if (HDPComponents.isMasterHost(host))
             hostEntity = hostEntity + HOST_MASTER_COLOR
         else
             hostEntity = hostEntity + HOST_COLOR
@@ -147,13 +147,13 @@ class HostBuilder {
         }
 
         hostEntity = hostEntity + "\",fontcolor="
-        if (host.isMaster())
+        if (HDPComponents.isMasterHost(host))
             hostEntity = hostEntity + HOST_MASTER_FONT_COLOR
         else
             hostEntity = hostEntity + HOST_FONT_COLOR
 
         hostEntity = hostEntity + ",fontsize="
-        if (host.isMaster())
+        if (HDPComponents.isMasterHost(host))
             hostEntity = hostEntity + HOST_MASTER_FONT_SIZE
         else
             hostEntity = hostEntity + HOST_FONT_SIZE
