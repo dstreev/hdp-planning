@@ -1,0 +1,85 @@
+{
+  "name":"root",
+  "capacity": 100,
+  "maximun-capacity": 100,
+  "minimum-user-limit-percent": 100,
+  "user-limit-factor": 1,
+  "maximum-applications":10000,
+  "maximum-am-resource-percent":0.1,
+  "state":"RUNNING",
+  "acl_submit_applications":"",
+  "acl_administer_queue":"",
+  "queue-mappings":"",
+  "queues":[
+    {
+      "name": "hr1",
+      "capacity": 20,
+      "maximun-capacity": 100,
+      "minimum-user-limit-percent": 100,
+      "user-limit-factor": 1,
+      "maximum-applications":10000,
+      "maximum-am-resource-percent":0.1,
+      "state":"RUNNING",
+      "acl_submit_applications":"",
+      "acl_administer_queue":"",
+      "queues": [
+        {
+          "name": "hr1_1",
+          "capacity": 80,
+          "maximun-capacity": 100,
+          "minimum-user-limit-percent": 100,
+          "user-limit-factor": 1,
+          "maximum-applications":10000,
+          "maximum-am-resource-percent":0.1,
+          "state":"RUNNING",
+          "acl_submit_applications":"",
+          "acl_administer_queue":"",
+          "queue-mappings": {
+            "users":["ted"],
+            "groups":["finance"]
+          }
+        },
+        {
+          "name": "hr1_2",
+          "capacity": 20,
+          "maximun-capacity": 100,
+          "minimum-user-limit-percent": 100,
+          "user-limit-factor": 1,
+          "maximum-applications":10000,
+          "maximum-am-resource-percent":0.1,
+          "state":"RUNNING",
+          "acl_submit_applications":"",
+          "acl_administer_queue":"",
+          "queue-mappings": {
+            "users":["ted"],
+            "groups":["finance"]
+          }
+        }
+
+      ]
+
+    },
+    {
+      "name": "hr2",
+      "capacity": 80,
+      "queues": [
+        {
+          "name": "hr2_1",
+          "capacity": 100,
+          "maximun-capacity": 100,
+          "minimum-user-limit-percent": 100,
+          "user-limit-factor": 1,
+          "maximum-applications":10000,
+          "maximum-am-resource-percent":0.1,
+          "state":"RUNNING",
+          "acl_submit_applications":"",
+          "acl_administer_queue":"",
+          "queue-mappings": {
+          }
+
+        }
+      ]
+    }
+  ]
+
+}
