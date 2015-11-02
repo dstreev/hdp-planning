@@ -4,6 +4,8 @@
 
     gradle fatJar
     
+Or get the built version [here](https://github.com/dstreev/hdp-planning/releases)
+    
 ## [Pre-Load Ambari Rack Info](./src/main/groovy/CfgHostRacksByTopology.groovy)
     
 When you upgrade an HDP stack to Ambari 2.1+, the rack definitions from the rack topology file are not picked up.  The only way to get this information into Ambari is either thru the Web UI or the REST API.
