@@ -3,6 +3,63 @@
 ## Build
 
     gradle fatJar
+    
+## [Pre-Load Ambari Rack Info](./src/main/groovy/CfgHostRacksByTopology.groovy)
+    
+When you upgrade an HDP stack to Ambari 2.1+, the rack definitions from the rack topology file are not picked up.  The only way to get this information into Ambari is either thru the Web UI or the REST API.
+
+This script is designed to build the REST API calls in a bash script, that are needed to translate the rack definitions in a topology file, into Ambari.
+
+NOTE: This process is driven via "Host" and not from the IP (currently).  That's because the Host is looked up in Ambari, via the "name" and not by IP.
+
+### Input
+
+#### App Parameters
+
+    usage: 
+     -a,--host-alias <arg>              Identify if the Host Name in the
+                                        Topology File is an Alias
+     -d,--domain <arg>                  If the Host name in the Topology file
+                                        is an Alias, specify the domain.
+     -h,--ambari-host:port <arg>        Ambari Host:Port
+     -hdr,--header                      Header in Topology File
+     -hf,--topology-host-field <arg>    Topology Host Field (fqdn)
+     -n,--cluster-name <arg>            Ambari Cluster Name
+     -o,--output <arg>                  Output File
+     -rf,--topology-rack-fields <arg>   Comma separated list of positions for
+                                        rack designation
+     -rp,--rack-prefix <arg>            Rack Prefix
+     -t,--topology-file <arg>           Original Topology File
+
+#### Example Topology File #1
+
+    IP Address    Rack       Server Name (fqdn)
+    
+    10.0.0.160    rack1      m1.hdp.local
+    10.0.0.161    rack1      m2.hdp.local
+    10.0.0.162    rack1      m3.hdp.local
+    10.0.0.165    rack2      d1.hdp.local
+    10.0.0.166    rack2      d2.hdp.local
+    10.0.0.167    rack2      d3.hdp.local
+
+#### Example Topology File #2
+
+    IP Address      Rack    Location        Server Name(alias)
+    
+    10.0.0.160    Home      1      m1
+    10.0.0.161    Home      2      m2
+    10.0.0.162    Home      3      m3
+    10.0.0.165    Home      1      d1
+    10.0.0.166    Home      1      d2
+    10.0.0.167    Home      2      d3
+
+#### Run
+ 
+    # For example Topology File #1
+    java -cp build/libs/hdp-planning-all.jar CfgHostRacksByTopology -t "/home/test/host_topology_test.data" -hf 2 -rf 1 -n Home -h m3.hdp.local:8080 -o /home/test/set_racks.sh -hdr
+
+    # For example Topology File #2
+    java -cp build/libs/hdp-planning-all.jar CfgHostRacksByTopology -t "/home/test/host_topology_test.data" -hf 3 -rf 1,2 -n Home -h m3.hdp.local:8080 -o /home/test/set_racks.sh -d hdp.local -hdr
 
 ## [Build Cluster Layout](./src/main/groovy/BuildClusterLayout.groovy)
 
