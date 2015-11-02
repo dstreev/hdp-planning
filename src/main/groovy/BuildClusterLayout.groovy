@@ -6,66 +6,70 @@ import groovy.json.JsonSlurper
 import groovyjarjarcommonscli.Option
 
 import groovyx.net.http.*
+import org.apache.commons.codec.binary.Base64
+
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
 
 /**
  * Created by dstreev on 12/4/14.
  *
- * Inputs:
- *  json - configuration file built through the Ambari REST API call:
- *  http://<ambari-host>:8080/api/v1/clusters/<clustername>/hosts?fields=Hosts/host_name,host_components,Hosts/ip,Hosts/total_mem,Hosts/os_arch,Hosts/rack_info,Hosts/cpu_count
- *  url - Ambari interface URL
- *  aname - Ambari Server username
- *  apass - Ambari Server password
- *
- *  Ambari doesn't current support com.hdp.planning.cluster.layout.Rack Awareness.  Supply com.hdp.planning.cluster.layout.Rack Information.
- *  rack - file with rack topology  default handling will consider the first element the ip address and the 2 as the rack.
- *  rack-fields - comma separated list of the field positions to use to extract the ip and rack info.  0 based.
- *
- *  TODO: Could we use the dfsadmin report as a source for rack information? Of course... worth the effort?
- *
  */
 
 def cli = new CliBuilder()
-cli.json(longOpt: 'json', args: 1, required: false, 'json Input File from Ambari REST API')
+cli.c(longOpt: 'cluster', args: 1, required: false, 'Cluster Input File from Ambari REST API')
 cli.url(longOpt: 'ambari-url', args: 1, required: false, 'url of the Ambari Server, should include port')
+cli.cn(longOpt: 'cluster-name', args: 1, required: false, 'Cluster Name')
 cli.user(longOpt: 'ambari-username', args: 1, required: false, 'Ambari Username')
 cli.pw(longOpt: 'ambari-password', args: 1, required: false, 'Ambari Password')
-cli.rack(longOpt: 'rack-file', args: 1, required: false, 'com.hdp.planning.cluster.layout.Rack Topology File')
-cli.fields(longOpt: 'rack-fields', args: Option.UNLIMITED_VALUES, valueSeparator: ',', required: false, 'Comma separated of positions for ip and rack in topology file')
-cli.output(longOpt: 'output-directory', args: 1, required: true, 'Output Directory')
+cli.r(longOpt: 'rack-file', args: 1, required: false, 'Rack Topology File')
+cli.rf(longOpt: 'rack-fields', args: Option.UNLIMITED_VALUES, valueSeparator: ',', required: false, 'Comma separated of positions for ip and rack in topology file')
+cli.o(longOpt: 'output-directory', args: 1, required: true, 'Output Directory')
 
 def options = cli.parse(this.args)
+
+if (options == null)
+    System.exit(-1);
 
 def env = new Env();
 
 def slurper = new JsonSlurper()
 def cluster
 // If "j" is specified, then the url, user and pw are not required.
-if (options.json) {
-    def json = new File(options.json)
+if (options.c) {
+    def json = new File(options.c)
     cluster = slurper.parse(json)
 
-} else if (options.url) {
+}
+
+if (options.url) {
 
     // WIP Still unable to get the RESTClient to validate...  Arg...
-    def http = new RESTClient(options.url.toString())
+    def apiURL =options.url + "/api/v1/clusters/" + options.cn + "/hosts?fields=Hosts/host_name,host_components,Hosts/ip,Hosts/total_mem,Hosts/os_arch,Hosts/os_type,Hosts/rack_info,Hosts/cpu_count,Hosts/disk_info,metrics/disk,Hosts/ph_cpu_count"
+    def http = new RESTClient(apiURL)
 
-    def user = 'admin';
-    def pw = 'admin';
-    if (options.user & options.pw) {
-        user = options.user
-        pw = options.pw
-    }
+//    def authString = "admin:admin"
+//    if (options.user != null && options.pw != null) {
+//        authString = options.user + ":" + options.pw
+//    }
+
+//    def String authStringEnc = Base64.encodeBase64(authString.getBytes());
+//    authString.decodeBase64()
+
+//    println authString
+
+//    http.auth.basic(options.user, options.pw)
+//    http.headers["Authorization"] = "Basic " + authString.decodeBase64()
 //    print "$user : $pw"
 //    http.auth.basic user, pw
     http.headers.'X-Requested-By' = 'ambari'
+    http.headers.'X-Requested-With' = 'XMLHttpRequest'
     http.headers.'User-Agent' = 'Mozilla/5.0 Ubuntu/8.10 Firefox/3.0.4'
 
-//    def authCred = ('admin:admin').bytes.encodeBase64();
+//    def authCred = (options.user + ":" + options.pw).bytes.encodeBase64();
 //        auth.basic(user,pw)
-    http.headers['Authorization'] = 'Basic YWRtaW46YWRtaW4='.bytes
+    http.headers.'Authorization' = 'Basic YWRtaW46aG9ydG9ud29ya3M='.bytes
+//    Basic YWRtaW46aG9ydG9ud29ya3M=
 //    http.headers['Authorization'] = 'Basic '+authCred
 
     http.request(GET,JSON) {
@@ -91,15 +95,13 @@ if (options.json) {
 
     return 0;
 
-} else {
-    // Issue need one or the other.
-    return -1
 }
+
 
 def rackPositions = []
 
-if (options.fields) {
-    options.fieldss.unique(false).each { field ->
+if (options.rf) {
+    options.rfs.unique(false).each { field ->
         rackPositions.add(Integer.parseInt(field))
     }
 } else {
@@ -110,8 +112,8 @@ if (options.fields) {
 def racks = [:]
 def ips = [:]
 
-if (options.rack) {
-    rackResult = RackBuilder.rackMap(new File(options.rack), rackPositions)
+if (options.r) {
+    rackResult = RackBuilder.rackMap(new File(options.r), rackPositions)
     racks = rackResult[0]
     ips = rackResult[1]
 }
@@ -121,6 +123,8 @@ println "IPs: " + ips
 
 def hosts = []
 def rackHosts = [:]
+
+def clusterName = cluster.items[0].Hosts.cluster_name
 
 cluster.items.each { item ->
     Host host = HostBuilder.fromAmbariJson(item)
@@ -145,15 +149,15 @@ cluster.items.each { item ->
     rackHostList.add(host)
 }
 
-targetDirectory = new File(options.output)
+targetDirectory = new File(options.o)
 if (!targetDirectory.exists()) {
     if (!targetDirectory.mkdirs()) {
-        println "Couldn't create target output directory: $options.output"
+        println "Couldn't create target output directory: $options.o"
         return -1;
     }
 }
 
-full_graph = new File(options.output + "/cluster.dot")
+full_graph = new File(options.o + System.getProperty("file.separator") + clusterName + ".dot")
 full_graph.withWriter { w ->
     w.writeLine("digraph all {")
     w.writeLine("\trankdir=LR;")
@@ -184,7 +188,7 @@ full_graph.withWriter { w ->
 
     w.write("{")
     rackHosts.keySet().each { rack ->
-        print("Rack: "+ rack)
+//        print("Rack: "+ rack)
         if ( rack != rackHosts.keySet().last()) {
             w.write(rack + " -> ")
         } else {
@@ -201,10 +205,23 @@ full_graph.withWriter { w ->
     w.close()
 }
 
-// TODO: Get the cluster name from the JSON.
-def command = "$env.graphExecutable -Tpng -o $options.output/cluster.png $options.output/cluster.dot"
-println "Command: ${command}"
+if (env.graphExecutable != null) {
+    def command = ["$env.graphExecutable", "-Tpng", "-o", options.o + System.getProperty("file.separator") + clusterName + ".png", options.o + System.getProperty("file.separator") + clusterName + ".dot"]
+    println "Command: ${command}"
 
-def proc = command.execute()
-proc.waitFor()
+    def Process proc = command.execute()
 
+    def out = new StringBuffer()
+    def err = new StringBuffer()
+    proc.consumeProcessOutput(out, err)
+
+    def rtn = proc.waitFor()
+
+    if (rtn != 0) {
+        println "Command was not successful. Returned: " + rtn
+        println "Error:"
+        println err
+    }
+} else {
+    println "Graph Executable hasn't been specified.  Run the 'dot' file through GraphViz to produce visual"
+}

@@ -24,7 +24,11 @@ class HDPComponents {
         HIVE_METASTORE("HM", "Hive Metastore"),
         HIVE_SERVER("HS2", "Hive Server2"),
         WEBHCAT_SERVER("WHCAT", "WebHCat"),
-        FALCON_SERVER("FLCN", "Falcon Server")
+        FALCON_SERVER("FLCN", "Falcon Server"),
+        KAFKA_BROKER("KFKB", "Kafka Broker"),
+        SUPERVISOR("STRM_SPRV", "Storm Supervisor"),
+        NIMBUS("STMR_N", "Storm Nimbus Server"),
+        DRPC_SERVER("STRM_DRPC", "Storm DPRC Server")
         final String abbreviation;
         final String description;
         ECO_MASTER_COMPONENT(String abbr, String desc) {
