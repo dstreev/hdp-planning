@@ -11,17 +11,22 @@ class Env {
     Env() {
         Properties props = new Properties();
         URL url = this.class.getResource('/default-env.properties')
-        if (url != null) {
-            URI filePath = url.toURI()
-            File file = new File(filePath)
-            if (file.exists()) {
-                file.withInputStream {
-                    props.load(it)
+        try {
+            if (url != null) {
+                URI filePath = url.toURI()
+                File file = new File(filePath)
+                if (file.exists()) {
+                    file.withInputStream {
+                        props.load(it)
 
+                    }
                 }
+            } else {
+                println 'Default Env properties file not found.'
             }
-        } else {
-            println 'Default Env properties file not found.'
+        }
+        catch (Exception e) {
+            //
         }
         graphExecutable = props.getProperty(GRAPH_EXECUTABLE, '/usr/local/bin/dot')
     }
