@@ -1,3 +1,4 @@
+import com.hdp.planning.cluster.layout.AmbariRest
 import com.hdp.planning.cluster.layout.Env
 import com.hdp.planning.cluster.layout.Host
 import com.hdp.planning.cluster.layout.HostBuilder
@@ -7,9 +8,15 @@ import groovyjarjarcommonscli.Option
 
 import groovyx.net.http.*
 import org.apache.commons.codec.binary.Base64
+import org.apache.http.HttpRequest
+import org.apache.http.HttpRequestInterceptor
+import org.apache.http.protocol.HttpContext
 
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
+
+import groovy.util.logging.Slf4j
+
 
 /**
  * Created by dstreev on 12/4/14.
@@ -18,10 +25,12 @@ import static groovyx.net.http.Method.*
 
 def cli = new CliBuilder()
 cli.c(longOpt: 'cluster', args: 1, required: false, 'Cluster Input File from Ambari REST API')
+
 cli.url(longOpt: 'ambari-url', args: 1, required: false, 'url of the Ambari Server, should include port')
 cli.cn(longOpt: 'cluster-name', args: 1, required: false, 'Cluster Name')
 cli.user(longOpt: 'ambari-username', args: 1, required: false, 'Ambari Username')
 cli.pw(longOpt: 'ambari-password', args: 1, required: false, 'Ambari Password')
+
 cli.r(longOpt: 'rack-file', args: 1, required: false, 'Rack Topology File')
 cli.rf(longOpt: 'rack-fields', args: Option.UNLIMITED_VALUES, valueSeparator: ',', required: false, 'Comma separated of positions for ip and rack in topology file')
 cli.o(longOpt: 'output-directory', args: 1, required: true, 'Output Directory')
@@ -33,70 +42,26 @@ if (options == null)
 
 def env = new Env();
 
-def slurper = new JsonSlurper()
 def cluster
+
 // If "j" is specified, then the url, user and pw are not required.
 if (options.c) {
+    def slurper = new JsonSlurper()
     def json = new File(options.c)
     cluster = slurper.parse(json)
-
-}
-
-if (options.url) {
-
-    // WIP Still unable to get the RESTClient to validate...  Arg...
-    def apiURL =options.url + "/api/v1/clusters/" + options.cn + "/hosts?fields=Hosts/host_name,host_components,Hosts/ip,Hosts/total_mem,Hosts/os_arch,Hosts/os_type,Hosts/rack_info,Hosts/cpu_count,Hosts/disk_info,metrics/disk,Hosts/ph_cpu_count"
-    def http = new RESTClient(apiURL)
-
-//    def authString = "admin:admin"
-//    if (options.user != null && options.pw != null) {
-//        authString = options.user + ":" + options.pw
-//    }
-
-//    def String authStringEnc = Base64.encodeBase64(authString.getBytes());
-//    authString.decodeBase64()
-
-//    println authString
-
-//    http.auth.basic(options.user, options.pw)
-//    http.headers["Authorization"] = "Basic " + authString.decodeBase64()
-//    print "$user : $pw"
-//    http.auth.basic user, pw
-    http.headers.'X-Requested-By' = 'ambari'
-    http.headers.'X-Requested-With' = 'XMLHttpRequest'
-    http.headers.'User-Agent' = 'Mozilla/5.0 Ubuntu/8.10 Firefox/3.0.4'
-
-//    def authCred = (options.user + ":" + options.pw).bytes.encodeBase64();
-//        auth.basic(user,pw)
-    http.headers.'Authorization' = 'Basic YWRtaW46aG9ydG9ud29ya3M='.bytes
-//    Basic YWRtaW46aG9ydG9ud29ya3M=
-//    http.headers['Authorization'] = 'Basic '+authCred
-
-    http.request(GET,JSON) {
-        // Get the Cluster name
-        uri.path = '/api/v1/clusters'
-//        authConfig.basic(user,pw)
-
-        response.success = { resp, json ->
-            println resp.statusLine
-
-            // parse the JSON response object:
-            json.responseData.results.each {
-                println "  ${it.titleNoFormatting} : ${it.visibleUrl}"
-            }
-        }
-        // Get the results.
-        //http://<ambari_host>:8080/api/v1/clusters/<cluster>/hosts?fields=Hosts/host_name,host_components,Hosts/ip,Hosts/total_mem,Hosts/os_arch,Hosts/os_type,Hosts/rack_info,Hosts/cpu_count,Hosts/disk_info,metrics/disk,Hosts/ph_cpu_count
-
-        response.failure = { resp ->
-            println "Unexpected error: ${resp.statusLine.statusCode} : ${resp.statusLine.reasonPhrase}"
-        }
+} else if (options.url) {
+    if (options.user == null || options.pw == null || options.c == null) {
+        println 'When using Ambari the username, password and Clustername must be specified'
+        return -1
     }
 
-    return 0;
+    def ambariRest = new AmbariRest(options.url, options.cn, options.user, options.pw)
 
+    cluster = ambariRest.getClusterInfo()
+
+} else {
+    println "Either a cluster file (-c) or an Ambari URL (-u) is required"
 }
-
 
 def rackPositions = []
 
@@ -129,14 +94,20 @@ def clusterName = cluster.items[0].Hosts.cluster_name
 cluster.items.each { item ->
     Host host = HostBuilder.fromAmbariJson(item)
     hosts.add(host)
-    // Set Rackname
-    host.rackName = ips.get(host.ip)
+
+    // If a Rack File was supplied, use it.  Otherwise, use the rack
+    // data in Ambari.
+    if (options.f) {
+        // Set Rackname
+        host.rackName = ips.get(host.ip)
+    }
 
     if (host.rackName == null) {
         rackHostList = rackHosts["NA"]
     } else {
         rackHostList = rackHosts[host.rackName]
     }
+
     if (rackHostList == null) {
         rackHostList = []
         if (host.rackName == null) {
@@ -165,9 +136,9 @@ full_graph.withWriter { w ->
     w.writeLine("\tnodesep=0.1")
 
     rackHosts.each { rack, hostlist ->
-        w.writeLine("subgraph cluster"+rack+" {")
+        w.writeLine("subgraph cluster" + HostBuilder.SafeEntityName(rack) + " {")
         w.writeLine("\tnode[shape=box]")
-        w.writeLine("\t"+rack+"[label=\"Rack " + rack + "\", shape=none]")
+        w.writeLine("\t" + HostBuilder.SafeEntityName(rack) + "[label=\"Rack " + rack + "\", shape=none]")
 
         // TODO Host Details.
         hostlist.each { host ->
@@ -175,7 +146,7 @@ full_graph.withWriter { w ->
             w.write()
         }
 
-        w.write("\t{ rank = same;" + rack + ";")
+        w.write("\t{ rank = same;" + HostBuilder.SafeEntityName(rack) + ";")
         hostlist.each { host ->
             if (host != hostlist.last()) {
                 w.write(HostBuilder.SafeEntityName(host.name) + ";");
@@ -189,10 +160,10 @@ full_graph.withWriter { w ->
     w.write("{")
     rackHosts.keySet().each { rack ->
 //        print("Rack: "+ rack)
-        if ( rack != rackHosts.keySet().last()) {
-            w.write(rack + " -> ")
+        if (rack != rackHosts.keySet().last()) {
+            w.write(HostBuilder.SafeEntityName(rack) + " -> ")
         } else {
-            w.write(rack + "[style=none,color=white]")
+            w.write(HostBuilder.SafeEntityName(rack) + "[style=none,color=white]")
         }
 
     }

@@ -239,7 +239,7 @@ class HostBuilder {
     }
 
     static String SafeEntityName(value) {
-        value.replaceAll("\\.","").replaceAll("-","")
+        value.replaceAll("\\.","").replaceAll("-","").replaceAll("/","_")
     }
 
     static Host fromAmbariJson(json) {
@@ -251,6 +251,7 @@ class HostBuilder {
         host.osArch = json.Hosts.os_arch
         host.cpuCount = json.Hosts.cpu_count
         host.totalMemory = json.Hosts.total_mem
+        host.rackName = json.Hosts.rack_info
 
         // Not currently supported in Ambari 1.7 and below
         // Need to get from rack topology or dfsadmin report

@@ -1,0 +1,59 @@
+{
+    "blueprint": "Home",
+    "default_password": "admin",
+    "configurations": [
+        
+    ],
+    "host_groups": [
+        {
+            "name": "host_group_1",
+            "configurations": [
+                
+            ],
+            "hosts": [
+                {
+                    "fqdn": "d1.hdp.local"
+                },
+                {
+                    "fqdn": "d2.hdp.local"
+                },
+                {
+                    "fqdn": "d3.hdp.local"
+                }
+            ]
+        },
+        {
+            "name": "host_group_2",
+            "configurations": [
+                
+            ],
+            "hosts": [
+                {
+                    "fqdn": "m1.hdp.local"
+                }
+            ]
+        },
+        {
+            "name": "host_group_3",
+            "configurations": [
+                
+            ],
+            "hosts": [
+                {
+                    "fqdn": "m2.hdp.local"
+                }
+            ]
+        },
+        {
+            "name": "host_group_4",
+            "configurations": [
+                
+            ],
+            "hosts": [
+                {
+                    "fqdn": "m3.hdp.local"
+                }
+            ]
+        }
+    ]
+}

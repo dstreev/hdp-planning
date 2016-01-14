@@ -1,3 +1,4 @@
+import com.hdp.planning.cluster.layout.AmbariRest
 import com.hdp.planning.cluster.layout.Env
 import com.hdp.planning.cluster.layout.Host
 import com.hdp.planning.cluster.layout.HostBuilder
@@ -29,9 +30,16 @@ cli.rp(longOpt: 'rack-prefix', args: 1, required: false, 'Rack Prefix')
 cli.a(longOpt: 'host-alias', args: 1, required: false, 'Identify if the Host Name in the Topology File is an Alias')
 cli.d(longOpt: 'domain', args: 1, required: false, 'If the Host name in the Topology file is an Alias, specify the domain.')
 
-cli.n(longOpt: 'cluster-name', args: 1, required: true, 'Ambari Cluster Name')
-cli.h(longOpt: 'ambari-host:port', args: 1, required: true, 'Ambari Host:Port')
-cli.o(longOpt: 'output', args: 1, required: true, 'Output File')
+cli.url(longOpt: 'ambari-url', args: 1, required: true, 'url of the Ambari Server, should include port')
+cli.cn(longOpt: 'cluster-name', args: 1, required: true, 'Cluster Name')
+cli.user(longOpt: 'ambari-username', args: 1, required: true, 'Ambari Username')
+cli.pw(longOpt: 'ambari-password', args: 1, required: true, 'Ambari Password')
+
+
+//cli.n(longOpt: 'cluster-name', args: 1, required: true, 'Ambari Cluster Name')
+//cli.h(longOpt: 'ambari-host:port', args: 1, required: true, 'Ambari Host:Port')
+
+//cli.o(longOpt: 'output', args: 1, required: true, 'Output File')
 cli.hdr(longOpt: 'header', args: 0, required: false, 'Header in Topology File')
 
 def options = cli.parse(this.args)
@@ -39,18 +47,19 @@ def options = cli.parse(this.args)
 if (options == null)
     System.exit(-1);
 
-def rackScript = "#!/bin/bash\n"
+def ambariRest = new AmbariRest(options.url, options.cn, options.user, options.pw)
 
-rackScript <<= "AMBARI_HOST=" + options.h + "\n"
-rackScript <<= "USER=\$1\n"
-rackScript <<= "PASSWORD=\$2\n"
+//def rackScript = "#!/bin/bash\n"
+
+//rackScript <<= "AMBARI_HOST=" + options.h + "\n"
+//rackScript <<= "USER=\$1\n"
+//rackScript <<= "PASSWORD=\$2\n"
 
 def rackPrefix
 if (options.rp)
     rackPrefix = options.rp
 else
     rackPrefix = ""
-
 
 def topologyFile = new File(options.t)
 
@@ -90,21 +99,23 @@ topologyFile.withReader { reader ->
 }
 
 //println hostRack
-def API_PATH = "http://\${AMBARI_HOST}/api/v1/clusters/Home/hosts"
-def CURL_CMD = "curl -u \${USER}:\${PASSWORD} -i -H \"X-Requested-By:ambari\" -X PUT -d"
+//def API_PATH = "http://\${AMBARI_HOST}/api/v1/clusters/Home/hosts"
+//def CURL_CMD = "curl -u \${USER}:\${PASSWORD} -i -H \"X-Requested-By:ambari\" -X PUT -d"
 
 hostRack.each { host, rack ->
-    def HOST_CMD = CURL_CMD
-    def reqBody = "{\"RequestInfo\":{\"context\":\"Set Rack\",\"query\":\"Hosts/host_name.in(" + host + ")\"},\"Body\":{\"Hosts\":{\"rack_info\":\"" + rack + "\"}}}"
 
+//    def HOST_CMD = CURL_CMD
+//    def reqBody = "{\"RequestInfo\":{\"context\":\"Set Rack\",\"query\":\"Hosts/host_name.in(" + host + ")\"},\"Body\":{\"Hosts\":{\"rack_info\":\"" + rack + "\"}}}"
 
-    HOST_CMD <<= " '" + reqBody + "' " + API_PATH
+    ambariRest.setHostRack(host, rack.toString())
 
-    rackScript <<= HOST_CMD + "\n"
+//    HOST_CMD <<= " '" + reqBody + "' " + API_PATH
+//
+//    rackScript <<= HOST_CMD + "\n"
 }
 
-def rackSetupF = new File(options.o)
+//def rackSetupF = new File(options.o)
 
-rackSetupF.setExecutable(true, false)
+//rackSetupF.setExecutable(true, false)
 
-rackSetupF.write(rackScript.toString())
+//rackSetupF.write(rackScript.toString())

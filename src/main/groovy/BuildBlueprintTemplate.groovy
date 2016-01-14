@@ -1,15 +1,6 @@
-import com.hdp.planning.cluster.layout.Env
-import com.hdp.planning.cluster.layout.Host
-import com.hdp.planning.cluster.layout.HostBuilder
-import com.hdp.planning.cluster.layout.RackBuilder
+import com.hdp.planning.cluster.layout.AmbariRest
 import groovy.json.JsonBuilder
-import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovyjarjarcommonscli.Option
-
-import groovyx.net.http.*
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
 
 /**
  * Created by dstreev on 10/30/2015.
@@ -21,6 +12,13 @@ import static groovyx.net.http.Method.*
 
 def cli = new CliBuilder()
 cli.c(longOpt: 'cluster', args: 1, required: true, 'Cluster File (Ambari REST API Output of Cluster)')
+
+//cli.url(longOpt: 'ambari-url', args: 1, required: false, 'url of the Ambari Server, should include port (Currently not working)')
+cli.cn(longOpt: 'cluster-name', args: 1, required: false, 'Cluster Name')
+//cli.user(longOpt: 'ambari-username', args: 1, required: false, 'Ambari Username')
+//cli.pw(longOpt: 'ambari-password', args: 1, required: false, 'Ambari Password')
+
+
 cli.bp(longOpt: 'blueprint', args: 1, required: true, 'Cluster Blueprint File')
 cli.name(longOpt: 'blueprint-name', args: 1, required: true, 'Target Blueprint Name')
 cli.o(longOpt: 'output-directory', args: 1, required: true, 'Output Directory')
@@ -30,20 +28,33 @@ def options = cli.parse(this.args)
 if (options == null)
     System.exit(-1);
 
-def env = new Env();
-
-def slurper = new JsonSlurper()
 def cluster
+def slurper
 
-def src = new File(options.c)
-cluster = slurper.parse(src)
+if (options.c) {
+    slurper = new JsonSlurper()
+    def json = new File(options.c)
+    cluster = slurper.parse(json)
+} else if (options.url) {
+    if (options.user == null || options.pw == null || options.c == null) {
+        log.info 'When using Ambari the username, password and Clustername must be specified'
+        return -1
+    }
+
+    def ambariRest = new AmbariRest(options.url, options.cn, options.user, options.pw)
+
+    cluster = ambariRest.getClusterInfo()
+
+} else {
+    println "Either a cluster file (-c) or an Ambari URL (-u) is required"
+}
 
 def bp
 
 def bpsrc = new File(options.bp)
 bp = slurper.parse(bpsrc)
 
-def obsoleteComponents = ["GANGLIA_MONITOR","GANGLIA_SERVER", "AMBARI_SERVER", "NAGIOS","STORM_REST_API"]
+def obsoleteComponents = ["GANGLIA_MONITOR", "GANGLIA_SERVER", "AMBARI_SERVER", "NAGIOS", "STORM_REST_API"]
 def hostgroups = [:]
 def template = [:]
 
@@ -74,15 +85,13 @@ cluster.items.each { item ->
         if (!obsoleteComponents.contains(component.HostRoles.component_name))
             components.add(component.HostRoles.component_name)
     }
-    hosts.put(name,components)
+    hosts.put(name, components)
 }
-
-
 
 /*
     Match Hosts to Host Groups
 */
-hosts.each {host,components ->
+hosts.each { host, components ->
     println host
     println components
     println "---------------"
@@ -97,7 +106,7 @@ hosts.each {host,components ->
             if (template.containsKey(hostgroup)) {
                 templateHosts = template.get(hostgroup)
             } else {
-                template.put(hostgroup,templateHosts)
+                template.put(hostgroup, templateHosts)
             }
             templateHosts.add(host)
         }

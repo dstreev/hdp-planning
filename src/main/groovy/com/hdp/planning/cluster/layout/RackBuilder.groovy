@@ -31,4 +31,5 @@ class RackBuilder {
 
         def rtn = [racks, ips]
     }
+
 }

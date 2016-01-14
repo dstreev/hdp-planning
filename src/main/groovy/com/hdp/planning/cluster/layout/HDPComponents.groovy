@@ -26,7 +26,6 @@ class HDPComponents {
         WEBHCAT_SERVER("WHCAT", "WebHCat"),
         FALCON_SERVER("FLCN", "Falcon Server"),
         KAFKA_BROKER("KFKB", "Kafka Broker"),
-        SUPERVISOR("STRM_SPRV", "Storm Supervisor"),
         NIMBUS("STMR_N", "Storm Nimbus Server"),
         DRPC_SERVER("STRM_DRPC", "Storm DPRC Server")
         final String abbreviation;
@@ -43,6 +42,7 @@ class HDPComponents {
         HIVE_CLIENT("HCLI\\n", "Hive CLI"),
         MAPREDUCE2_CLIENT("MRC", "MapReduce Client"),
         OOZIE_CLIENT("OZC", "Oozie Client"),
+        SUPERVISOR("STRM_SPRV", "Storm Supervisor"),
         PIG("PIG", "Pig"),
         SQOOP("SQP", "Sqoop"),
         TEZ_CLIENT("TC", "Tez Client"),

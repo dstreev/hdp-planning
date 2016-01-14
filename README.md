@@ -69,7 +69,7 @@ Is a script that uses the json output from Ambari and a rack topology (optional)
 
 Use the following query against the Ambari REST API to build the needed cluster input file.
 
-Sample Query issued to Ambari for output:
+Sample Query issued to Ambari for Cluster Input File (-c|--cluster):
 
 ```
 http://<ambari_host>:8080/api/v1/clusters/<cluster>/hosts?fields=Hosts/host_name,host_components,Hosts/ip,Hosts/total_mem,Hosts/os_arch,Hosts/os_type,Hosts/rack_info,Hosts/cpu_count,Hosts/disk_info,metrics/disk,Hosts/ph_cpu_count
@@ -98,6 +98,11 @@ Is a script that is designed to build a Blueprint Environment Template File from
 
 Used to help with upgrades from 2.1 to 2.2+ of HDP.
 
+Sample Query issued to Ambari for Cluster Input File (-c|--cluster):
+
+```
+http://<ambari_host>:<port>/api/v1/clusters/<cluster_name>/hosts?fields=Hosts/host_name,host_components,Hosts/ip,Hosts/total_mem,Hosts/os_arch,Hosts/os_type,Hosts/rack_info,Hosts/cpu_count,Hosts/disk_info,metrics/disk,Hosts/ph_cpu_count
+```  
     
 ### Input
 
@@ -105,10 +110,11 @@ Used to help with upgrades from 2.1 to 2.2+ of HDP.
     usage:
         -bp,--blueprint <arg>          Cluster Blueprint File
         -name,--blueprint-name <arg>   Target Blueprint Name
-        -o,--output-file <arg>         Output File
-        -c,--cluster <arg>             Source Cluster File (Ambari REST API
-                                           Output of Cluster)
+        -o,--output-directory <arg>    Output Directory
+        -c,--cluster <arg>             Cluster Input File from Ambari REST API
 
 ### Run
 
-java -cp build/libs/hdp-planning-all.jar BuildBlueprintTemplate -bp cluster-bp.json -name dev-bp -src cluster.json -output ./dev-template.json
+java -cp build/libs/hdp-planning-all.jar BuildBlueprintTemplate -bp src/test/resources/sample-cluster-bp.json -name Home -c src/test/resources/sample-cluster-cfg.json -o build
+
+Will result in a file `Home-template.json` in the `build` directory.
