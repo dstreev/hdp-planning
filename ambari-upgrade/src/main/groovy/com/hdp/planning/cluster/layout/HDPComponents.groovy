@@ -10,6 +10,10 @@ class HDPComponents {
         HISTORYSERVER("HS", "History Server"),
         RESOURCEMANAGER("RM", "Resource Manager"),
         NAMENODE("NN", "Namenode"),
+        HST_SERVER("HST", "Smart Sense HST Server"),
+        INFRA_SOLR("INFRASOLR", "Infrastructure Solr"),
+        METRICS_GRAFANA("GRAFANA", "Grafana"),
+        SPARK2_JOBHISTORYSERVER("SHIST2", "Spark2 Job History Server"),
         ZKFC("ZKFC", "ZooKeeper Fence Controller")
         final String abbreviation;
         final String description;
@@ -23,6 +27,10 @@ class HDPComponents {
         OOZIE_SERVER("OZ", "Oozie Server"),
         HIVE_METASTORE("HM", "Hive Metastore"),
         HIVE_SERVER("HS2", "Hive Server2"),
+        KNOX_GATEWAY("KNOX", "Knox Gateway"),
+        ACTIVITY_EXPLORER("AE", "Activity Explorer"),
+        ACTIVITY_ANALYZER("AA", "Activity Analyzer"),
+        METRICS_COLLECTOR("MC", "Metrics Collector"),
         WEBHCAT_SERVER("WHCAT", "WebHCat"),
         FALCON_SERVER("FLCN", "Falcon Server"),
         KAFKA_BROKER("KFKB", "Kafka Broker"),
@@ -46,6 +54,9 @@ class HDPComponents {
         PIG("PIG", "Pig"),
         SQOOP("SQP", "Sqoop"),
         TEZ_CLIENT("TC", "Tez Client"),
+        SPARK_CLIENT("SPARKC", "Spark Client"),
+        SPARK2_CLIENT("SPARK2C", "Spark2 Client"),
+        INFRA_SOLR_CLIENT("INFRASOLRCLNT", "Infrastructure Solr Client"),
         YARN_CLIENT("YC", "Yarn Client"),
         ZOOKEEPER_CLIENT("ZC", "ZooKeeper Client"),
         HCAT("HCAT", "HCat")
