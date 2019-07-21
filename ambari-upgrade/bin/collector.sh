@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Collect all the values required to build an envirment document.
+# Collect all the values required to build an environment document.
 
 # Artifacts
 # 1. Ambari Cluster Layout.
@@ -22,7 +22,7 @@ cd `dirname $0`
 if [ -f $1-env.sh ]; then
     . ./$1-env.sh
 else
-    . ./default-env.sh
+    . default-env.sh
 fi
 
 # Look for hdp-mac-utils to switch environments.

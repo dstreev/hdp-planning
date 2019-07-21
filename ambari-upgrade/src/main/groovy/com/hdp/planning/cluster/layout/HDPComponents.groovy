@@ -9,14 +9,18 @@ class HDPComponents {
         HISTORYSERVER("HS", "History Server"),
         RESOURCEMANAGER("RM", "Resource Manager"),
         NAMENODE("NN", "Namenode"),
-        ZKFC("ZKFC", "ZooKeeper Fence Controller"),
         APP_TIMELINE_SERVER("APP_TIMELINE_SERVER","APP_TIMELINE_SERVER"),
         RANGER_ADMIN("RANGER_ADMIN","RANGER_ADMIN"),
         RANGER_KMS_SERVER("RANGER_KMS_SERVER","RANGER_KMS_SERVER"),
         RANGER_TAGSYNC("RANGER_TAGSYNC","RANGER_TAGSYNC"),
         RANGER_USERSYNC("RANGER_USERSYNC","RANGER_USERSYNC"),
         HIVE_METASTORE("HM", "Hive Metastore"),
-        ATLAS_SERVER("ATLAS_SERVER","ATLAS_SERVER")
+        ATLAS_SERVER("ATLAS_SERVER","ATLAS_SERVER"),
+        HST_SERVER("HST", "Smart Sense HST Server"),
+        INFRA_SOLR("INFRASOLR", "Infrastructure Solr"),
+        METRICS_GRAFANA("GRAFANA", "Grafana"),
+        SPARK2_JOBHISTORYSERVER("SHIST2", "Spark2 Job History Server"),
+        ZKFC("ZKFC", "ZooKeeper Fence Controller")
         final String abbreviation;
         final String description;
         MASTER_COMPONENT(String abbr, String desc) {
@@ -28,12 +32,12 @@ class HDPComponents {
         HBASE_MASTER("HBM","HBase Master"),
         OOZIE_SERVER("OZ", "Oozie Server"),
         HIVE_SERVER("HS2", "Hive Server2"),
+        KNOX_GATEWAY("KNOX", "Knox Gateway"),
         WEBHCAT_SERVER("WHCAT", "WebHCat"),
         FALCON_SERVER("FLCN", "Falcon Server"),
         KAFKA_BROKER("KFKB", "Kafka Broker"),
         NIMBUS("STMR_N", "Storm Nimbus Server"),
         DRPC_SERVER("STRM_DRPC", "Storm DPRC Server"),
-        KNOX_GATEWAY("KNOX_GATEWAY","KNOX_GATEWAY"),
         ACTIVITY_ANALYZER("ACTIVITY_ANALYZER","ACTIVITY_ANALYZER"),
         ACTIVITY_EXPLORER("ACTIVITY_EXPLORER","ACTIVITY_EXPLORER"),
         ZEPPELIN_MASTER("ZEPPELIN_MASTER","ZEPPELIN_MASTER"),
@@ -61,6 +65,8 @@ class HDPComponents {
         PIG("PIG", "Pig"),
         SQOOP("SQP", "Sqoop"),
         TEZ_CLIENT("TC", "Tez Client"),
+        SPARK_CLIENT("SPARKC", "Spark Client"),
+        SPARK2_CLIENT("SPARK2C", "Spark2 Client"),
         YARN_CLIENT("YC", "Yarn Client"),
         ZOOKEEPER_CLIENT("ZC", "ZooKeeper Client"),
         HCAT("HCAT", "HCat"),
@@ -68,7 +74,6 @@ class HDPComponents {
         ATLAS_CLIENT("ATLAS_CLIENT","ATLAS_CLIENT"),
         INFRA_SOLR_CLIENT("INFRA_SOLR_CLIENT","INFRA_SOLR_CLIENT"),
         SLIDER("SLIDER","SLIDER")                                  ,
-        SPARK2_CLIENT("SPARK2_CLIENT","SPARK2_CLIENT")
         final String abbreviation;
         final String description;
         CLIENT_COMPONENT(String abbr, String desc) {

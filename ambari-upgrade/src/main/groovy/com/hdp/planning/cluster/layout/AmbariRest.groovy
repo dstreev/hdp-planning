@@ -2,18 +2,15 @@ package com.hdp.planning.cluster.layout
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import groovyx.net.http.ContentType
-import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient
-import net.sf.json.JsonConfig
-import net.sf.json.util.CycleDetectionStrategy
+//import net.sf.json.JsonConfig
+//import net.sf.json.util.CycleDetectionStrategy
 
-import static groovyx.net.http.Method.GET
-import static groovyx.net.http.Method.PUT
-import static groovyx.net.http.ContentType.URLENC
-import static groovyx.net.http.ContentType.JSON
+//import static groovyx.net.http.Method.GET
+//import static groovyx.net.http.Method.PUT
 
 import groovy.util.logging.Slf4j
+import net.sf.json.JsonConfig
 
 /**
  * Created by dstreev on 2015-11-08.

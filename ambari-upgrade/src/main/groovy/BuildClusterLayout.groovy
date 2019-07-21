@@ -6,7 +6,6 @@ import com.hdp.planning.cluster.layout.RackBuilder
 import groovy.json.JsonSlurper
 import groovyjarjarcommonscli.Option
 
-import groovyx.net.http.*
 
 /**
  * Created by dstreev on 12/4/14.
