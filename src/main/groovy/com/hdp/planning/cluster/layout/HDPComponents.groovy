@@ -6,11 +6,17 @@ class HDPComponents {
     static enum MASTER_COMPONENT {
         JOURNALNODE("JN", "Journal Node"),
         ZOOKEEPER_SERVER("ZKSRV", "ZooKeeper Server"),
-        APP_TIMELINE_SERVER("ATS", "Application Timeline Server"),
         HISTORYSERVER("HS", "History Server"),
         RESOURCEMANAGER("RM", "Resource Manager"),
         NAMENODE("NN", "Namenode"),
-        ZKFC("ZKFC", "ZooKeeper Fence Controller")
+        ZKFC("ZKFC", "ZooKeeper Fence Controller"),
+        APP_TIMELINE_SERVER("APP_TIMELINE_SERVER","APP_TIMELINE_SERVER"),
+        RANGER_ADMIN("RANGER_ADMIN","RANGER_ADMIN"),
+        RANGER_KMS_SERVER("RANGER_KMS_SERVER","RANGER_KMS_SERVER"),
+        RANGER_TAGSYNC("RANGER_TAGSYNC","RANGER_TAGSYNC"),
+        RANGER_USERSYNC("RANGER_USERSYNC","RANGER_USERSYNC"),
+        HIVE_METASTORE("HM", "Hive Metastore"),
+        ATLAS_SERVER("ATLAS_SERVER","ATLAS_SERVER")
         final String abbreviation;
         final String description;
         MASTER_COMPONENT(String abbr, String desc) {
@@ -21,13 +27,22 @@ class HDPComponents {
     static enum ECO_MASTER_COMPONENT {
         HBASE_MASTER("HBM","HBase Master"),
         OOZIE_SERVER("OZ", "Oozie Server"),
-        HIVE_METASTORE("HM", "Hive Metastore"),
         HIVE_SERVER("HS2", "Hive Server2"),
         WEBHCAT_SERVER("WHCAT", "WebHCat"),
         FALCON_SERVER("FLCN", "Falcon Server"),
         KAFKA_BROKER("KFKB", "Kafka Broker"),
         NIMBUS("STMR_N", "Storm Nimbus Server"),
-        DRPC_SERVER("STRM_DRPC", "Storm DPRC Server")
+        DRPC_SERVER("STRM_DRPC", "Storm DPRC Server"),
+        KNOX_GATEWAY("KNOX_GATEWAY","KNOX_GATEWAY"),
+        ACTIVITY_ANALYZER("ACTIVITY_ANALYZER","ACTIVITY_ANALYZER"),
+        ACTIVITY_EXPLORER("ACTIVITY_EXPLORER","ACTIVITY_EXPLORER"),
+        ZEPPELIN_MASTER("ZEPPELIN_MASTER","ZEPPELIN_MASTER"),
+        HIVE_SERVER_INTERACTIVE("HIVE_SERVER_INTERACTIVE","HIVE_SERVER_INTERACTIVE"),
+        LIVY2_SERVER("LIVY2_SERVER","LIVY2_SERVER"),
+        METRICS_COLLECTOR("METRICS_COLLECTOR","METRICS_COLLECTOR"),
+        PHOENIX_QUERY_SERVER("PHOENIX_QUERY_SERVER","PHOENIX_QUERY_SERVER")
+        , SPARK2_JOBHISTORYSERVER ("SPARK2_JOBHISTORYSERVER","SPARK2_JOBHISTORYSERVER")
+        , SPARK2_THRIFTSERVER("SPARK2_THRIFTSERVER","SPARK2_THRIFTSERVER")
         final String abbreviation;
         final String description;
         ECO_MASTER_COMPONENT(String abbr, String desc) {
@@ -48,7 +63,12 @@ class HDPComponents {
         TEZ_CLIENT("TC", "Tez Client"),
         YARN_CLIENT("YC", "Yarn Client"),
         ZOOKEEPER_CLIENT("ZC", "ZooKeeper Client"),
-        HCAT("HCAT", "HCat")
+        HCAT("HCAT", "HCat"),
+        KERBEROS_CLIENT("KERBEROS_CLIENT", "Kerberos Client"),
+        ATLAS_CLIENT("ATLAS_CLIENT","ATLAS_CLIENT"),
+        INFRA_SOLR_CLIENT("INFRA_SOLR_CLIENT","INFRA_SOLR_CLIENT"),
+        SLIDER("SLIDER","SLIDER")                                  ,
+        SPARK2_CLIENT("SPARK2_CLIENT","SPARK2_CLIENT")
         final String abbreviation;
         final String description;
         CLIENT_COMPONENT(String abbr, String desc) {
@@ -57,10 +77,23 @@ class HDPComponents {
         }
     }
 
+    static enum AGENT_COMPONENT {
+        HST_AGENT("HST_AGENT", "HST Agent"),
+        METRICS_MONITOR("METRICS_MONITOR","Metrics Monitor")
+        final String abbreviation;
+        final String description;
+        AGENT_COMPONENT(String abbr, String desc) {
+            this.abbreviation = abbr;
+            this.description = desc;
+        }
+
+    }
+
     static enum CORE_COMPONENT {
         DATANODE("DN", "Datanode"),
         NODEMANAGER("NM", "NodeManager"),
         HBASE_REGIONSERVER("HBR", "HBase Region Server")
+        , KAFKA_BROKER("KAFKA_BROKER","KAFKA_BROKER")
         final String abbreviation;
         final String description;
         CORE_COMPONENT(String abbr, String desc) {
@@ -73,6 +106,10 @@ class HDPComponents {
         GANGLIA_MONITOR("GM", "Ganglia Monitor"),
         GANGLIA_SERVER("GS", "Ganglia Server"),
         NAGIOS_SERVER("NS", "Nagios Server")
+        , DP_PROFILER_AGENT("DPA","DataPlane Profiler Agent")
+        , METRICS_GRAFANA("METRICS_GRAFANA","METRICS_GRAFANA")
+        , HST_SERVER("HST_SERVER","HST_SERVER")
+        , INFRA_SOLR("INFRA_SOLR","INFRA_SOLR")
         final String abbreviation;
         final String description;
         MANAGEMENT_COMPONENT(String abbr, String desc) {
@@ -133,7 +170,7 @@ class HDPComponents {
     static String[] getNonMasterComponents(host) {
         def masterComponents = []
         host.components.each { component ->
-            if (HDP_COMPONENTS.contains(component) | MANAGEMENT_COMPONENTS.contains(component) | CLIENT_COMPONENTS.contains(component))
+            if (HDP_COMPONENTS.contains(component) | MANAGEMENT_COMPONENTS.contains(component) | CLIENT_COMPONENTS.contains(component) | AGENT_COMPONENTS.contains(component))
                 masterComponents.add(component)
 
         }

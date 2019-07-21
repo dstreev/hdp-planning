@@ -1,6 +1,6 @@
 plugins {
-    id 'groovy' // or 'groovy' Must be explicitly applied
-    id 'com.github.johnrengelman.shadow' version '1.2.2'
+//    id 'groovy' // or 'groovy' Must be explicitly applied
+//    id 'com.github.johnrengelman.shadow' version '1.2.2'
 }
 
 apply plugin: 'groovy'

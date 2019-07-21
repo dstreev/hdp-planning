@@ -7,16 +7,6 @@ import groovy.json.JsonSlurper
 import groovyjarjarcommonscli.Option
 
 import groovyx.net.http.*
-import org.apache.commons.codec.binary.Base64
-import org.apache.http.HttpRequest
-import org.apache.http.HttpRequestInterceptor
-import org.apache.http.protocol.HttpContext
-
-import static groovyx.net.http.ContentType.*
-import static groovyx.net.http.Method.*
-
-import groovy.util.logging.Slf4j
-
 
 /**
  * Created by dstreev on 12/4/14.
@@ -177,7 +167,7 @@ full_graph.withWriter { w ->
 }
 
 if (env.graphExecutable != null) {
-    def command = ["$env.graphExecutable", "-Tpng", "-o", options.o + System.getProperty("file.separator") + clusterName + ".png", options.o + System.getProperty("file.separator") + clusterName + ".dot"]
+    def command = ["$env.graphExecutable", "-Tsvg", "-o", options.o + System.getProperty("file.separator") + clusterName + ".svg", options.o + System.getProperty("file.separator") + clusterName + ".dot"]
     println "Command: ${command}"
 
     def Process proc = command.execute()

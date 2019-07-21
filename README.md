@@ -82,15 +82,21 @@ http://<ambari_host>:8080/api/v1/clusters/<cluster>/hosts?fields=Hosts/host_name
     
 #### App Parameters 
     usage: 
-        -rf,--rack-fields <arg>       Comma separated of positions for ip
-                                            and rack in topology file
-        -c,--cluster <arg>            Cluster Input File from Ambari REST API
-        -o,--output-directory <arg>   Output Directory
-        -r,--rack-file <arg>          Rack Topology File
-                                            
+        -c,--cluster <arg>              Cluster Input File from Ambari REST API
+        -cn,--cluster-name <arg>        Cluster Name
+        -o,--output-directory <arg>     Output Directory
+        -pw,--ambari-password <arg>     Ambari Password
+        -r,--rack-file <arg>            Rack Topology File
+        -rf,--rack-fields <arg>         Comma separated of positions for ip and
+                                         rack in topology file
+        -url,--ambari-url <arg>         url of the Ambari Server, should include
+                                         port
+        -user,--ambari-username <arg>   Ambari Username                                            
 ### Run
 
-java -cp build/libs/hdp-planning-all.jar -DgraphExecutable=/usr/local/bin/dot BuildClusterLayout -json cluster.json -rack host_topology.data -fields 0,2 -output . 
+```
+    java -cp build/libs/hdp-planning-all.jar -DgraphExecutable=/usr/local/bin/dot BuildClusterLayout -c cluster.json -r host_topology.data -rf 0,2 -o . 
+```
 
 ## [Generate Template from Blueprint](./src/main/groovy/BuildBlueprintTemplate.groovy) 
 
@@ -115,6 +121,8 @@ http://<ambari_host>:<port>/api/v1/clusters/<cluster_name>/hosts?fields=Hosts/ho
 
 ### Run
 
+```
 java -cp build/libs/hdp-planning-all.jar BuildBlueprintTemplate -bp src/test/resources/sample-cluster-bp.json -name Home -c src/test/resources/sample-cluster-cfg.json -o build
+```
 
 Will result in a file `Home-template.json` in the `build` directory.
