@@ -19,3 +19,7 @@ target
 *.iml
 
 customer
+/gradlew
+/gradlew.bat
+                                                   x
+/gradle/
